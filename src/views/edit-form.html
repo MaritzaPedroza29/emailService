@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Reminder</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navegación -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <!-- Logo -->
+                    <a href="/" class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </a>
+                    <div class="ml-4 text-xl font-bold text-indigo-600">Reminder App</div>
+                </div>
+                
+                <!-- Enlaces de navegación -->
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Inicio
+                    </a>
+                    <a href="/list" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Lista de Recordatorios
+                    </a>
+                    <button 
+                        onclick="logout()"
+                        class="text-white bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="flex items-center justify-center min-h-screen p-6">
+        <div class="bg-white p-6 rounded shadow-md w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-4">Editar Recordatorio</h2>
+            <form id="editForm" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" name="email" id="email" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="reminder" class="block text-sm font-medium text-gray-700">Reminder</label>
+                    <textarea name="reminder" id="reminder" required 
+                              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                </div>
+                <div>
+                    <label for="frequency" class="block text-sm font-medium text-gray-700">Frequency</label>
+                    <select name="frequency" id="frequency" required 
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <div id="monthlyOptions" class="hidden space-y-4">
+                    <div>
+                        <label for="monthDay" class="block text-sm font-medium text-gray-700">Día del mes</label>
+                        <select name="monthDay" id="monthDay" 
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </select>
+                    </div>
+                    <div>
+                        <label for="time" class="block text-sm font-medium text-gray-700">Hora</label>
+                        <input type="time" name="time" id="time" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="submit" 
+                            class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
+                        Guardar
+                    </button>
+                    <a href="/list" 
+                       class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 text-center">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Generar opciones para los días del mes
+        const monthDaySelect = document.getElementById('monthDay');
+        for(let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            monthDaySelect.appendChild(option);
+        }
+
+        // Obtener ID del recordatorio de la URL
+        const id = window.location.pathname.split('/').pop();
+
+        // Cargar datos del recordatorio
+        async function loadReminder() {
+            try {
+                const response = await fetch(`/reminders/${id}`);
+                const reminder = await response.json();
+                
+                document.getElementById('email').value = reminder.email;
+                document.getElementById('reminder').value = reminder.reminder;
+                document.getElementById('frequency').value = reminder.frequency;
+                
+                if (reminder.frequency === 'monthly') {
+                    document.getElementById('monthlyOptions').classList.remove('hidden');
+                    const nextSend = new Date(reminder.next_send);
+                    document.getElementById('monthDay').value = nextSend.getDate();
+                    document.getElementById('time').value = 
+                        `${String(nextSend.getHours()).padStart(2, '0')}:${String(nextSend.getMinutes()).padStart(2, '0')}`;
+                }
+            } catch (error) {
+                console.error('Error cargando recordatorio:', error);
+            }
+        }
+
+        // Mostrar/ocultar opciones mensuales
+        document.getElementById('frequency').addEventListener('change', function(e) {
+            const monthlyOptions = document.getElementById('monthlyOptions');
+            if (e.target.value === 'monthly') {
+                monthlyOptions.classList.remove('hidden');
+                document.getElementById('monthDay').required = true;
+                document.getElementById('time').required = true;
+            } else {
+                monthlyOptions.classList.add('hidden');
+                document.getElementById('monthDay').required = false;
+                document.getElementById('time').required = false;
+            }
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email'),
+                reminder: formData.get('reminder'),
+                frequency: formData.get('frequency')
+            };
+
+            if (data.frequency === 'monthly') {
+                data.monthDay = formData.get('monthDay');
+                data.time = formData.get('time');
+            }
+
+            try {
+                const response = await fetch(`/reminders/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    window.location.href = '/list';
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Error al actualizar el recordatorio');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        });
+
+        // Cargar datos cuando la página se carga
+        document.addEventListener('DOMContentLoaded', loadReminder);
+
+        function logout() {
+            fetch('/logout')
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al cerrar sesión');
+                });
+        }
+    </script>
+</body>
+</html> 

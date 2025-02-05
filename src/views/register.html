@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Reminder App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+            <div class="text-center mb-8">
+                <svg class="h-12 w-12 text-indigo-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h2 class="text-2xl font-bold text-gray-800 mt-4">Crear Cuenta</h2>
+                <p class="text-gray-600 mt-2">Regístrate para comenzar</p>
+            </div>
+
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">
+                        Nombre Completo
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Tu nombre"
+                    >
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Correo Electrónico
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="ejemplo@correo.com"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        Contraseña
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="••••••••"
+                    >
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+                        Confirmar Contraseña
+                    </label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="••••••••"
+                    >
+                </div>
+
+                <div>
+                    <button 
+                        type="submit" 
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Registrarse
+                    </button>
+                </div>
+
+                <div class="text-center text-sm">
+                    <span class="text-gray-600">¿Ya tienes una cuenta?</span>
+                    <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500 ml-1">
+                        Inicia sesión aquí
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirmPassword: formData.get('confirmPassword')
+            };
+
+            if (data.password !== data.confirmPassword) {
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'Las contraseñas no coinciden',
+                    icon: 'error',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    await Swal.fire({
+                        title: '¡Registro exitoso!',
+                        text: 'Tu cuenta ha sido creada correctamente',
+                        icon: 'success',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                    window.location.href = '/login';
+                } else {
+                    const error = await response.json();
+                    await Swal.fire({
+                        title: 'Error',
+                        text: error.message || 'Error al crear la cuenta',
+                        icon: 'error',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'Error de conexión',
+                    icon: 'error',
+                    confirmButtonColor: '#4F46E5'
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

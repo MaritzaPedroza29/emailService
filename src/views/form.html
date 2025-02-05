@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Recordatorio</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navegación -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <!-- Logo y nombre de la app (izquierda) -->
+                <div class="flex-shrink-0 flex items-center">
+                    <img class="h-8 w-8" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5' /%3E%3C/svg%3E" alt="Logo">
+                    <span class="ml-2 text-xl font-bold text-gray-900">Recordatorios App</span>
+                </div>
+
+                <!-- Links de navegación (derecha) -->
+                <div class="flex items-center space-x-8">
+                    <a href="/form" 
+                       class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out
+                          ${window.location.pathname === '/form' ? 
+                          'bg-indigo-100 text-indigo-700' : 
+                          'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}">
+                        <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Inicio
+                    </a>
+                    <a href="/list" 
+                       class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out
+                          ${window.location.pathname === '/list' ? 
+                          'bg-indigo-100 text-indigo-700' : 
+                          'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}">
+                        <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Recordatorios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="max-w-2xl mx-auto py-8 px-4">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Crear Nuevo Recordatorio</h1>
+        
+        <form id="reminderForm" class="space-y-6 bg-white p-6 rounded-lg shadow">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">
+                    Email
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       required 
+                       placeholder="ejemplo@correo.com"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+
+            <div>
+                <label for="reminder" class="block text-sm font-medium text-gray-700">
+                    Recordatorio
+                </label>
+                <textarea id="reminder" 
+                          name="reminder" 
+                          required 
+                          rows="3" 
+                          placeholder="Escribe tu recordatorio aquí"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+            </div>
+
+            <div>
+                <label for="frequency" class="block text-sm font-medium text-gray-700">
+                    Frecuencia
+                </label>
+                <select id="frequency" 
+                        name="frequency" 
+                        required 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">Selecciona una frecuencia</option>
+                    <option value="daily">Diario</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                </select>
+            </div>
+
+            <button type="submit" 
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                Crear Recordatorio
+            </button>
+        </form>
+    </div>
+
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+            console.log('Iniciando submitForm');
+
+            // Obtener los valores del formulario
+            const email = document.getElementById('email').value.trim();
+            const reminder = document.getElementById('reminder').value.trim();
+            const frequency = document.getElementById('frequency').value;
+
+            console.log('Valores del formulario:', { email, reminder, frequency });
+
+            // Validar campos
+            if (!email || !reminder || !frequency) {
+                console.log('Validación fallida - campos vacíos');
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor completa todos los campos',
+                    icon: 'error',
+                    confirmButtonColor: '#EF4444'
+                });
+                return;
+            }
+
+            try {
+                console.log('Iniciando petición al servidor');
+                
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Creando recordatorio...',
+                    text: 'Por favor espera un momento',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Crear el objeto de datos
+                const formData = {
+                    email,
+                    reminder,
+                    frequency
+                };
+
+                console.log('Enviando datos al servidor:', formData);
+
+                // Enviar datos al servidor
+                const response = await fetch('/reminders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+
+                console.log('Respuesta recibida:', response.status);
+                const data = await response.json();
+                console.log('Datos de respuesta:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.error || data.message || 'Error al crear el recordatorio');
+                }
+
+                // Si llegamos aquí, el recordatorio se creó exitosamente
+                console.log('Recordatorio creado exitosamente');
+
+                const result = await Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El recordatorio se ha creado correctamente',
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ver recordatorios',
+                    cancelButtonText: 'Crear otro',
+                    confirmButtonColor: '#4F46E5',
+                    cancelButtonColor: '#9CA3AF'
+                });
+
+                if (result.isConfirmed) {
+                    console.log('Redirigiendo a la lista');
+                    window.location.href = '/list';
+                } else {
+                    console.log('Limpiando formulario para crear otro');
+                    document.getElementById('reminderForm').reset();
+                    validateForm();
+                }
+
+            } catch (error) {
+                console.error('Error en la creación del recordatorio:', error);
+                
+                await Swal.fire({
+                    title: 'Error',
+                    text: error.message || 'No se pudo crear el recordatorio',
+                    icon: 'error',
+                    confirmButtonColor: '#EF4444'
+                });
+            }
+        }
+
+        function validateForm() {
+            const email = document.getElementById('email').value.trim();
+            const reminder = document.getElementById('reminder').value.trim();
+            const frequency = document.getElementById('frequency').value;
+            const submitButton = document.querySelector('button[type="submit"]');
+
+            const isValid = email && reminder && frequency;
+            console.log('Validación del formulario:', { isValid, email, reminder, frequency });
+
+            if (submitButton) {
+                submitButton.disabled = !isValid;
+                submitButton.classList.toggle('opacity-50', !isValid);
+                submitButton.classList.toggle('cursor-not-allowed', !isValid);
+            }
+
+            return isValid;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Cargado - Inicializando formulario');
+            
+            const form = document.getElementById('reminderForm');
+            
+            if (form) {
+                console.log('Formulario encontrado - Agregando eventos');
+                
+                form.addEventListener('submit', async (e) => {
+                    console.log('Formulario enviado');
+                    await submitForm(e);
+                });
+
+                ['email', 'reminder', 'frequency'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('input', () => {
+                            console.log(`Cambio en campo ${id}`);
+                            validateForm();
+                        });
+                    } else {
+                        console.error(`Elemento ${id} no encontrado`);
+                    }
+                });
+
+                validateForm();
+            } else {
+                console.error('Formulario no encontrado');
+            }
+        });
+    </script>
+</body>
+</html> 
