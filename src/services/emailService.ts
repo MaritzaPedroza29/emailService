@@ -1,6 +1,4 @@
 import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 import logger from './logger.js';
 import { readFileSync } from 'fs';
@@ -11,21 +9,11 @@ const envPath = './.env';
 try {
     // Intentar leer el archivo directame./nte
     const envContent = readFileSync(envPath, 'utf8');
-    console.log('Contenido del archivo .env:', envContent);
 
     // Cargar .env con ruta absoluta
     const result = dotenv.config({ 
         path: envPath,
         debug: true
-    });
-
-    console.log('Resultado de cargar .env:', {
-        error: result.error ? result.error.message : 'No hay error',
-        parsed: result.parsed,
-        envVars: {
-            EMAIL_USER: process.env.EMAIL_USER,
-            HAS_PASSWORD: !!process.env.EMAIL_PASSWORD
-        }
     });
 
     // Si no hay variables, las configuramos manualmente
@@ -40,11 +28,6 @@ try {
 
         process.env.EMAIL_USER = envVars.EMAIL_USER;
         process.env.EMAIL_PASSWORD = envVars.EMAIL_PASSWORD;
-
-        console.log('Variables configuradas manualmente:', {
-            EMAIL_USER: process.env.EMAIL_USER,
-            HAS_PASSWORD: !!process.env.EMAIL_PASSWORD
-        });
     }
 
 } catch (error) {
@@ -56,22 +39,17 @@ try {
 const EMAIL_USER = process.env.EMAIL_USER || '';
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || '';
 
-console.log('Variables finales:', {
-    EMAIL_USER,
-    HAS_PASSWORD: !!EMAIL_PASSWORD
-});
-
-if (!EMAIL_USER || !EMAIL_PASSWORD) {
-    const errorMsg = `Configuración de email incompleta después de todo el proceso de carga`;
-    logger.error(errorMsg, {
-        envPath,
-        loadedVars: {
-            hasUser: !!process.env.EMAIL_USER,
-            hasPassword: !!process.env.EMAIL_PASSWORD
-        }
-    });
-    throw new Error(errorMsg);
-}
+// if (!EMAIL_USER || !EMAIL_PASSWORD) {
+//     const errorMsg = `Configuración de email incompleta después de todo el proceso de carga`;
+//     logger.error(errorMsg, {
+//         envPath,
+//         loadedVars: {
+//             hasUser: !!process.env.EMAIL_USER,
+//             hasPassword: !!process.env.EMAIL_PASSWORD
+//         }
+//     });
+//     throw new Error(errorMsg);
+// }
 
 // Configuración del transporter
 const transporter = nodemailer.createTransport({
@@ -80,32 +58,11 @@ const transporter = nodemailer.createTransport({
         user: EMAIL_USER,
         pass: EMAIL_PASSWORD
     },
-    debug: true
 });
 
-// Verificar la configuración
-transporter.verify((error, success) => {
-    if (error) {
-        logger.error('Error en la verificación del transporter:', {
-            error,
-            emailUser: EMAIL_USER,
-            hasPassword: !!EMAIL_PASSWORD
-        });
-    } else {
-        logger.info('Transporter configurado correctamente:', {
-            emailUser: EMAIL_USER,
-            success
-        });
-    }
-});
 
 export async function sendEmail(to: string, reminder: string): Promise<boolean> {
     try {
-        logger.info('Intentando enviar email:', {
-            from: EMAIL_USER,
-            to
-        });
-
         const info: SentMessageInfo = await transporter.sendMail({
             from: {
                 name: 'Sistema de Recordatorios',
@@ -124,11 +81,6 @@ export async function sendEmail(to: string, reminder: string): Promise<boolean> 
                     </p>
                 </div>
             `
-        });
-
-        logger.info('Email enviado exitosamente:', {
-            messageId: info?.messageId,
-            response: info?.response
         });
 
         return true;

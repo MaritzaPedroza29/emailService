@@ -77,12 +77,6 @@ app.use(session({
 
 // Middleware para verificar la autenticación
 const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    logger.info('Checking authentication:', { 
-        sessionExists: !!req.session,
-        userExists: !!req.session?.user,
-        userId: req.session?.user?.id
-    });
-
     if (!req.session || !req.session.user) {
         logger.warn('Authentication failed: No session or user');
         return res.status(401).json({ message: 'No autorizado' });
@@ -149,8 +143,6 @@ app.post('/register', async (req, res) => {
                                 error: err instanceof Error ? err.message : 'Unknown error'
                             });
                         }
-
-                        logger.info('User created successfully:', { id: this.lastID });
                         res.json({ 
                             success: true,
                             message: 'Usuario creado exitosamente'
@@ -174,8 +166,6 @@ app.post('/register', async (req, res) => {
 // Endpoint para procesar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
-    logger.info('Login attempt:', { email });
 
     try {
         db.get<User>('SELECT * FROM users WHERE email = ?', [email], async (err, user: User | undefined) => {
@@ -201,13 +191,6 @@ app.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name
             };
-
-            logger.info('Login successful:', { 
-                userId: user.id,
-                email: user.email,
-                sessionId: req.session.id
-            });
-
             res.json({ success: true });
         });
     } catch (error) {
@@ -251,7 +234,6 @@ app.get('/logout', (req: express.Request, res: express.Response) => {
 app.post('/add-reminder', (req, res) => {
   try {
     const { email, reminder, frequency } = req.body;
-    logger.info('Nuevo recordatorio recibido', { email, frequency });
 
     // Validaciones básicas
     if (!email || !reminder || !frequency) {
@@ -291,19 +273,11 @@ app.post('/add-reminder', (req, res) => {
             details: err instanceof Error ? err.message : 'Error desconocido'
           });
         }
-        logger.info('Recordatorio guardado exitosamente', { 
-          id: this.lastID,
-          email,
-          frequency 
-        });
-        
-        logger.info('Enviando email de confirmación', { email, reminder });
 
         sendEmail(
         email,
         `Tu recordatorio "${reminder}" ha sido configurado exitosamente.`
         ).then(() => {
-        logger.info('Email enviado con éxito', { email });
         res.json({ success: true });
         }).catch(emailError => {
         logger.error('Error enviando email de confirmación', { emailError });
@@ -343,8 +317,6 @@ app.get('/reminders', requireAuth, (req, res) => {
     }
 
     const userId = req.session.user.id;
-    
-    logger.info('Fetching reminders for user:', { userId });
 
     const query = `
         SELECT 
@@ -361,23 +333,12 @@ app.get('/reminders', requireAuth, (req, res) => {
             return res.status(500).json({ error: 'Error al obtener recordatorios' });
         }
 
-        logger.info('Reminders fetched successfully:', { 
-            userId,
-            count: rows?.length || 0
-        });
-
         res.json(rows || []);
     });
 });
 
 // Endpoint para crear recordatorio
 app.post('/reminders', requireAuth, async (req, res) => {
-    console.log('Iniciando creación de recordatorio');
-    logger.info('POST /reminders - Request received:', {
-        body: req.body,
-        session: req.session
-    });
-
     try {
         // Verificar sesión
         if (!req.session.user) {
@@ -387,14 +348,6 @@ app.post('/reminders', requireAuth, async (req, res) => {
 
         const userId = req.session.user.id;
         const { email, reminder, frequency } = req.body;
-
-        logger.info('Datos recibidos:', {
-            userId,
-            email,
-            reminder,
-            frequency,
-            sessionUser: req.session.user
-        });
 
         // Validar campos
         if (!email || !reminder || !frequency) {
@@ -429,12 +382,6 @@ app.post('/reminders', requireAuth, async (req, res) => {
                 break;
         }
 
-        logger.info('Intentando insertar recordatorio:', {
-            userId,
-            email,
-            nextSendDate
-        });
-
         // Insertar recordatorio
         const insertResult = await new Promise<number>((resolve, reject) => {
             const query = `
@@ -444,26 +391,18 @@ app.post('/reminders', requireAuth, async (req, res) => {
             `;
             const params = [userId, email, reminder, frequency, nextSendDate.toISOString()];
 
-            logger.info('Ejecutando query:', { query, params });
-
             db.run(query, params, function(err) {
                 if (err) {
                     logger.error('Error en inserción:', err);
                     reject(err);
                 } else {
-                    logger.info('Inserción exitosa:', { lastID: this.lastID });
                     resolve(this.lastID);
                 }
             });
         });
-
-        logger.info('Recordatorio insertado:', { id: insertResult });
-
         // Enviar el primer correo inmediatamente
         try {
-            logger.info('Intentando enviar correo inicial');
             await sendEmail(email, reminder);
-            logger.info('Correo inicial enviado exitosamente');
 
             // Actualizar last_sent
             await new Promise<void>((resolve, reject) => {
@@ -473,14 +412,11 @@ app.post('/reminders', requireAuth, async (req, res) => {
                     WHERE id = ?
                 `;
                 
-                logger.info('Actualizando last_sent:', { id: insertResult });
-                
                 db.run(updateQuery, [insertResult], (err) => {
                     if (err) {
                         logger.error('Error actualizando last_sent:', err);
                         reject(err);
                     } else {
-                        logger.info('last_sent actualizado exitosamente');
                         resolve();
                     }
                 });
@@ -529,7 +465,6 @@ async function sendReminders() {
         for (const reminder of reminders) {
             try {
                 await sendEmail(reminder.email, reminder.reminder);
-                logger.info(`Reminder sent to ${reminder.email}`);
 
                 // Actualizar next_send basado en la frecuencia
                 const nextSendDate = new Date();
@@ -569,20 +504,6 @@ async function sendReminders() {
 
 // Mantener el intervalo de envío de recordatorios
 setInterval(sendReminders, 60 * 1000); // Cada minuto
-
-app.get('/test-email', async (req, res) => {
-  try {
-    const result = await sendEmail(
-      'est_em_pedraza@fesc.edu.co',
-      'Este es un correo de prueba'
-    );
-    res.json({ success: result });
-  } catch (error: any) {
-    res.status(500).json({ 
-      error: error?.message || 'Error desconocido' 
-    });
-  }
-});
 
 // Endpoint para eliminar recordatorio
 app.delete('/reminders/:id', (req, res) => {
@@ -684,5 +605,5 @@ app.put('/reminders/:id', requireAuth, async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  logger.info(`Servidor iniciado en http://localhost:${PORT}`);
+  `http://localhost:${PORT}`;
 }); 

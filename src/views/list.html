@@ -43,6 +43,10 @@
                         </svg>
                         Recordatorios
                     </a>
+                    <!-- Botón de Cerrar Sesión -->
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                        Cerrar Sesión
+                    </button>
                 </div>
             </div>
         </div>
@@ -140,30 +144,30 @@
                 }
 
                 remindersListElement.innerHTML = reminders.map(reminder => `
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-900 mb-2">${reminder.reminder}</h3>
-                                <p class="text-gray-600">Email: ${reminder.email}</p>
-                                <p class="text-gray-600">Frecuencia: ${reminder.frequency}</p>
-                                <p class="text-gray-600">Próximo envío: ${formatDate(reminder.next_send)}</p>
-                                ${reminder.last_sent ? 
-                                    `<p class="text-gray-600">Último envío: ${formatDate(reminder.last_sent)}</p>` 
-                                    : ''}
-                            </div>
-                            
-                            <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                                <button onclick="editReminder(${reminder.id})"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                                    Editar
-                                </button>
-                                <button onclick="deleteReminder(${reminder.id})"
-                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
-                                    Eliminar
-                                </button>
-                            </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-900 mb-2">${reminder.reminder}</h3>
+                            <p class="text-gray-600">Email: ${reminder.email}</p>
+                            <p class="text-gray-600">Frecuencia: ${translateFrequency(reminder.frequency)}</p>
+                            <p class="text-gray-600">Próximo envío: ${formatDate(reminder.next_send)}</p>
+                            ${reminder.last_sent ? 
+                                `<p class="text-gray-600">Último envío: ${formatDate(reminder.last_sent)}</p>` 
+                                : ''}
+                        </div>
+                        
+                        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                            <button onclick="editReminder(${reminder.id})"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                Editar
+                            </button>
+                            <button onclick="deleteReminder(${reminder.id})"
+                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                                Eliminar
+                            </button>
                         </div>
                     </div>
+                </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading reminders:', error);
@@ -305,6 +309,22 @@
 
         // Cargar recordatorios cuando se carga la página
         document.addEventListener('DOMContentLoaded', loadReminders);
+
+        function logout() {
+            localStorage.removeItem("userSession");  // Elimina la sesión
+            window.location.href = "/logout";  // Redirige a la pantalla de login
+        }
+
+        const translateFrequency = (frequency) => {
+            const translations = {
+                'daily': 'Diario',
+                'weekly': 'Semanal',
+                'monthly': 'Mensual',
+                // Agrega más traducciones según sea necesario
+            };
+            return translations[frequency] || frequency;
+        }
+
     </script>
 </body>
 </html> 

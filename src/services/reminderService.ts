@@ -25,7 +25,6 @@ export function calculateNextSendDate(frequency: string, from: Date = new Date()
 }
 
 export async function processReminders(): Promise<void> {
-  logger.info('Iniciando procesamiento de recordatorios');
   
   return new Promise((resolve, reject) => {
     db.all(
@@ -39,8 +38,6 @@ export async function processReminders(): Promise<void> {
           reject(err);
           return;
         }
-
-        logger.info(`Encontrados ${rows.length} recordatorios para procesar`);
 
         for (const reminder of rows) {
           logger.info('Procesando recordatorio', { 
@@ -79,8 +76,6 @@ export async function processReminders(): Promise<void> {
             });
           }
         }
-        
-        logger.info('Procesamiento de recordatorios completado');
         resolve();
       }
     );

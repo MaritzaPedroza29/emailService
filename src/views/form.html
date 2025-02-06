@@ -27,9 +27,9 @@
 
                 <!-- Links de navegación (derecha) -->
                 <div class="flex items-center space-x-8">
-                    <a href="/form" 
+                    <a href="/" 
                        class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out
-                          ${window.location.pathname === '/form' ? 
+                          ${window.location.pathname === '/' ? 
                           'bg-indigo-100 text-indigo-700' : 
                           'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}">
                         <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,6 +47,10 @@
                         </svg>
                         Recordatorios
                     </a>
+                     <!-- Botón de Cerrar Sesión -->
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                        Cerrar Sesión
+                    </button>
                 </div>
             </div>
         </div>
@@ -106,14 +110,11 @@
     <script>
         async function submitForm(event) {
             event.preventDefault();
-            console.log('Iniciando submitForm');
 
             // Obtener los valores del formulario
             const email = document.getElementById('email').value.trim();
             const reminder = document.getElementById('reminder').value.trim();
             const frequency = document.getElementById('frequency').value;
-
-            console.log('Valores del formulario:', { email, reminder, frequency });
 
             // Validar campos
             if (!email || !reminder || !frequency) {
@@ -128,8 +129,6 @@
             }
 
             try {
-                console.log('Iniciando petición al servidor');
-                
                 // Mostrar loading
                 Swal.fire({
                     title: 'Creando recordatorio...',
@@ -147,8 +146,6 @@
                     frequency
                 };
 
-                console.log('Enviando datos al servidor:', formData);
-
                 // Enviar datos al servidor
                 const response = await fetch('/reminders', {
                     method: 'POST',
@@ -160,16 +157,11 @@
                     credentials: 'include'
                 });
 
-                console.log('Respuesta recibida:', response.status);
                 const data = await response.json();
-                console.log('Datos de respuesta:', data);
 
                 if (!response.ok) {
                     throw new Error(data.error || data.message || 'Error al crear el recordatorio');
                 }
-
-                // Si llegamos aquí, el recordatorio se creó exitosamente
-                console.log('Recordatorio creado exitosamente');
 
                 const result = await Swal.fire({
                     title: '¡Éxito!',
@@ -183,17 +175,13 @@
                 });
 
                 if (result.isConfirmed) {
-                    console.log('Redirigiendo a la lista');
                     window.location.href = '/list';
                 } else {
-                    console.log('Limpiando formulario para crear otro');
                     document.getElementById('reminderForm').reset();
                     validateForm();
                 }
 
             } catch (error) {
-                console.error('Error en la creación del recordatorio:', error);
-                
                 await Swal.fire({
                     title: 'Error',
                     text: error.message || 'No se pudo crear el recordatorio',
@@ -210,7 +198,6 @@
             const submitButton = document.querySelector('button[type="submit"]');
 
             const isValid = email && reminder && frequency;
-            console.log('Validación del formulario:', { isValid, email, reminder, frequency });
 
             if (submitButton) {
                 submitButton.disabled = !isValid;
@@ -222,12 +209,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Cargado - Inicializando formulario');
             
             const form = document.getElementById('reminderForm');
             
             if (form) {
-                console.log('Formulario encontrado - Agregando eventos');
                 
                 form.addEventListener('submit', async (e) => {
                     console.log('Formulario enviado');
@@ -238,19 +223,22 @@
                     const element = document.getElementById(id);
                     if (element) {
                         element.addEventListener('input', () => {
-                            console.log(`Cambio en campo ${id}`);
                             validateForm();
                         });
                     } else {
-                        console.error(`Elemento ${id} no encontrado`);
                     }
                 });
 
                 validateForm();
             } else {
-                console.error('Formulario no encontrado');
             }
         });
+
+        function logout() {
+            localStorage.removeItem("userSession");  // Elimina la sesión
+            window.location.href = "/logout";  // Redirige a la pantalla de login
+        }
+
     </script>
 </body>
 </html> 

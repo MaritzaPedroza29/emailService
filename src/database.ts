@@ -22,8 +22,6 @@ interface User {
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     logger.error('Error al conectar con la base de datos:', { error: err });
-  } else {
-    logger.info('Conexión exitosa con la base de datos');
   }
 });
 
@@ -135,15 +133,12 @@ async function initializeDatabase() {
                     created_at, active, user_id
                 FROM reminders_backup
             `);
-            logger.info('Datos de recordatorios restaurados exitosamente.');
         } else {
             logger.warn('No se restauraron datos de recordatorios porque no había respaldo disponible.');
         }
 
         // 9. Eliminar `reminders_backup` solo después de restaurar los datos correctamente
         await runQuery(`DROP TABLE IF EXISTS reminders_backup`);
-
-        logger.info('Database initialization completed successfully');
     } catch (error) {
         logger.error('Error in database initialization:', error);
         throw error;
